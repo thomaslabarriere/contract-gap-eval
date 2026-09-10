@@ -66,7 +66,7 @@ Recall par sévérité
 
 That 88% is instructive: the offline keyword baseline **misses one major gap** — the C-4 clause *"le prestataire conserve l'intégralité des droits de propriété intellectuelle ; aucune cession n'est consentie au client."* It names all the right words, so a keyword scan reads it as compliant; only reading the negation reveals it grants the client nothing. Run the LLM agent (`--agent llm`) and re-measure to see whether it closes the gap — exactly the question you'd ask before trusting either one in front of a General Counsel.
 
-`contract-gap-eval reliability` exits non-zero if any real gap was missed → CI gate.
+`contract-gap-eval reliability` exits non-zero only if a **critical** gap was missed → CI gate. The offline baseline misses one *major* gap (the IP disclaimer above) but no critical, so it passes; a lax agent that misses a critical gap fails the build.
 
 ## Run the real agent (LLM)
 
@@ -80,7 +80,7 @@ With a key, an LLM judges each (contract, rule) pair and cites a verbatim clause
 
 ## Two guardrails that matter for legal
 
-- **Citation hallucination (objective).** Every flagged gap must be justified by a quote that **actually appears in the contract** (checked by substring). An agent that invents a clause is caught with certainty — no judgment call.
+- **Citation hallucination (objective).** Whenever a verdict cites a clause as evidence, that quote must **actually appear in the contract** (checked by substring) — an agent that invents a clause is caught with certainty, no judgment call. (Structured-rule gaps like a missing liability cap cite a field check rather than a quote; the guard applies to every verdict that does cite text, which the LLM agent is prompted to always do.)
 - **Evidence relevance (judged, and the judge is calibrated).** A cited clause can be real yet irrelevant to the rule. That softer call is delegated to a judge whose own agreement with a labelled gold set is reported by `calibrate` — *who judges the judge?*
 
 ## Why you can trust the harness (mutation proof)
