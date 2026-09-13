@@ -23,7 +23,7 @@ contract-gap-eval calibrate             # how reliable is the evidence judge its
 
 ```
 ────────────────────────────────────────────────────────────────────
-Matrice d'écarts, Contrat de fourniture, Fournisseur B [C-2]
+Matrice d'écarts: Contrat de fourniture, Fournisseur B [C-2]
 ────────────────────────────────────────────────────────────────────
 Écarts: 4 / 7 règles vérifiées
 
@@ -52,7 +52,7 @@ OK CONF      Confidentialité
 
 ```
 ────────────────────────────────────────────────────────────────────
-Fiabilité de l'agent, heuristic
+Fiabilité de l'agent: heuristic
 ────────────────────────────────────────────────────────────────────
 Gap-recall: 88% (7/8 écarts détectés)   Précision: 100%
 Écarts manqués: 1 (dont critiques: 0)

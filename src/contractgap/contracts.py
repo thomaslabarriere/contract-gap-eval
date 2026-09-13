@@ -3,7 +3,7 @@
 Fields (payment days, liability cap, governing law) stand in for what an
 extraction step would pull out; clause texts carry the judgment-rule content.
 One IP clause (C-4) mentions the right words but actually GRANTS NOTHING to the
-client — a semantic gap a keyword scan misses but an expert (or an LLM) catches.
+client, a semantic gap a keyword scan misses but an expert (or an LLM) catches.
 No real contracts. Not legal advice.
 """
 
@@ -14,7 +14,7 @@ from .models import Clause, Contract
 CONTRACTS: list[Contract] = [
     Contract(
         contract_id="C-1",
-        title="Prestation SaaS — Fournisseur A",
+        title="Prestation SaaS, Fournisseur A",
         payment_days=45.0,
         liability_cap=500000.0,
         governing_law="français",
@@ -34,7 +34,7 @@ CONTRACTS: list[Contract] = [
     ),
     Contract(
         contract_id="C-2",
-        title="Contrat de fourniture — Fournisseur B",
+        title="Contrat de fourniture, Fournisseur B",
         payment_days=90.0,
         liability_cap=None,
         governing_law="anglais",
@@ -49,7 +49,7 @@ CONTRACTS: list[Contract] = [
     ),
     Contract(
         contract_id="C-3",
-        title="Contrat de conseil — Fournisseur C",
+        title="Contrat de conseil, Fournisseur C",
         payment_days=60.0,
         liability_cap=200000.0,
         governing_law="français",
@@ -63,7 +63,7 @@ CONTRACTS: list[Contract] = [
     ),
     Contract(
         contract_id="C-4",
-        title="Contrat de développement — Fournisseur D",
+        title="Contrat de développement, Fournisseur D",
         payment_days=None,
         liability_cap=100000.0,
         governing_law="français",

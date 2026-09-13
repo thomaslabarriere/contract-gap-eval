@@ -12,7 +12,7 @@ _SEV_ORDER = [Severity.CRITICAL, Severity.MAJOR, Severity.MINOR]
 
 def render_contract_report(report: ContractReport) -> str:
     bar = "─" * 68
-    lines = [bar, f"Matrice d'écarts — {report.title} [{report.contract_id}]", bar]
+    lines = [bar, f"Matrice d'écarts: {report.title} [{report.contract_id}]", bar]
     lines.append(f"Écarts: {len(report.gaps)} / {len(report.verdicts)} règles vérifiées")
     lines.append("")
     for v in report.verdicts:
@@ -29,7 +29,7 @@ def render_contract_report(report: ContractReport) -> str:
 
 def render_reliability_report(rel: ReliabilityReport) -> str:
     bar = "─" * 68
-    lines = [bar, f"Fiabilité de l'agent — {rel.agent_name}", bar]
+    lines = [bar, f"Fiabilité de l'agent: {rel.agent_name}", bar]
     lines.append(
         f"Gap-recall: {rel.gap_recall * 100:.0f}% "
         f"({rel.caught_gaps}/{rel.true_gaps} écarts détectés)   "
