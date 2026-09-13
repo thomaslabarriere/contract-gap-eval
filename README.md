@@ -1,10 +1,10 @@
 # contract-gap-eval
 
-**A contract-vs-policy gap-analysis agent — with a gap-recall reliability harness for legal review.**
+**A contract-vs-policy gap-analysis agent, with a gap-recall reliability harness for legal review.**
 
-An AI agent that reviews contracts is only deployable in a legal department if you can state one number: **of the real gaps, how many does it miss?** A missed non-compliant clause is the false negative that gets a client sued. `contract-gap-eval` runs an agent that compares a contract to an internal policy and produces a **gap matrix**, then measures its **gap-recall** (overall and by severity), its precision, and — objectively — whether it invents clauses that aren't there.
+An AI agent that reviews contracts is only deployable in a legal department if you can state one number: **of the real gaps, how many does it miss?** A missed non-compliant clause is the false negative that gets a client sued. `contract-gap-eval` runs an agent that compares a contract to an internal policy and produces a **gap matrix**, then measures its **gap-recall** (overall and by severity), its precision, and, objectively, whether it invents clauses that aren't there.
 
-> **Scope.** SYNTHETIC contracts and a SIMPLIFIED illustrative internal policy — not legal advice, not a real compliance product, no client data. The value is the diagnostic instrument (and how honestly it measures missed gaps), not the legal content. Plug in a real policy + contracts for real numbers.
+> **Scope.** SYNTHETIC contracts and a SIMPLIFIED illustrative internal policy, not legal advice, not a real compliance product, no client data. The value is the diagnostic instrument (and how honestly it measures missed gaps), not the legal content. Plug in a real policy + contracts for real numbers.
 
 ## Quick start (no API key needed)
 
@@ -23,7 +23,7 @@ contract-gap-eval calibrate             # how reliable is the evidence judge its
 
 ```
 ────────────────────────────────────────────────────────────────────
-Matrice d'écarts — Contrat de fourniture — Fournisseur B [C-2]
+Matrice d'écarts, Contrat de fourniture, Fournisseur B [C-2]
 ────────────────────────────────────────────────────────────────────
 Écarts: 4 / 7 règles vérifiées
 
@@ -48,11 +48,11 @@ OK CONF      Confidentialité
 
 ## The number a legal team asks for: gap-recall
 
-`contract-gap-eval reliability` scores the agent against a labelled gold set. The star metric is **gap-recall by severity** — a missed *critical* gap is what destroys client trust:
+`contract-gap-eval reliability` scores the agent against a labelled gold set. The star metric is **gap-recall by severity**, a missed *critical* gap is what destroys client trust:
 
 ```
 ────────────────────────────────────────────────────────────────────
-Fiabilité de l'agent — heuristic
+Fiabilité de l'agent, heuristic
 ────────────────────────────────────────────────────────────────────
 Gap-recall: 88% (7/8 écarts détectés)   Précision: 100%
 Écarts manqués: 1 (dont critiques: 0)
@@ -64,7 +64,7 @@ Recall par sévérité
   minor     100%  (1/1)
 ```
 
-That 88% is instructive: the offline keyword baseline **misses one major gap** — the C-4 clause *"le prestataire conserve l'intégralité des droits de propriété intellectuelle ; aucune cession n'est consentie au client."* It names all the right words, so a keyword scan reads it as compliant; only reading the negation reveals it grants the client nothing. Run the LLM agent (`--agent llm`) and re-measure to see whether it closes the gap — exactly the question you'd ask before trusting either one in front of a General Counsel.
+That 88% is instructive: the offline keyword baseline **misses one major gap**, the C-4 clause *"le prestataire conserve l'intégralité des droits de propriété intellectuelle ; aucune cession n'est consentie au client."* It names all the right words, so a keyword scan reads it as compliant; only reading the negation reveals it grants the client nothing. Run the LLM agent (`--agent llm`) and re-measure to see whether it closes the gap, exactly the question you'd ask before trusting either one in front of a General Counsel.
 
 `contract-gap-eval reliability` exits non-zero only if a **critical** gap was missed → CI gate. The offline baseline misses one *major* gap (the IP disclaimer above) but no critical, so it passes; a lax agent that misses a critical gap fails the build.
 
@@ -80,8 +80,8 @@ With a key, an LLM judges each (contract, rule) pair and cites a verbatim clause
 
 ## Two guardrails that matter for legal
 
-- **Citation hallucination (objective).** Whenever a verdict cites a clause as evidence, that quote must **actually appear in the contract** (checked by substring) — an agent that invents a clause is caught with certainty, no judgment call. (Structured-rule gaps like a missing liability cap cite a field check rather than a quote; the guard applies to every verdict that does cite text, which the LLM agent is prompted to always do.)
-- **Evidence relevance (judged, and the judge is calibrated).** A cited clause can be real yet irrelevant to the rule. That softer call is delegated to a judge whose own agreement with a labelled gold set is reported by `calibrate` — *who judges the judge?*
+- **Citation hallucination (objective).** Whenever a verdict cites a clause as evidence, that quote must **actually appear in the contract** (checked by substring), an agent that invents a clause is caught with certainty, no judgment call. (Structured-rule gaps like a missing liability cap cite a field check rather than a quote; the guard applies to every verdict that does cite text, which the LLM agent is prompted to always do.)
+- **Evidence relevance (judged, and the judge is calibrated).** A cited clause can be real yet irrelevant to the rule. That softer call is delegated to a judge whose own agreement with a labelled gold set is reported by `calibrate`, *who judges the judge?*
 
 ## Why you can trust the harness (mutation proof)
 
