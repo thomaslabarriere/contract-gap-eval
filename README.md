@@ -6,6 +6,8 @@ An AI agent that reviews contracts is only deployable in a legal department if y
 
 > **Scope.** SYNTHETIC contracts and a SIMPLIFIED illustrative internal policy, not legal advice, not a real compliance product, no client data. The value is the diagnostic instrument (and how honestly it measures missed gaps), not the legal content. Plug in a real policy + contracts for real numbers.
 
+> **On the word "agent".** The thing under test is a **one-shot classifier/verifier**, not an autonomous agent: for each (contract, rule) pair the real-model path is a single `chat.completions.create` call with one `report_gap` tool and no planning, memory, or multi-step tool loop. Where the code and this README say "agent" it is only a loose label for "the thing being evaluated"; the offline baseline and the `lax`/`hallucinator`/oracle fixtures are plain, network-free classifiers. Plug in a genuinely agentic reviewer and the same harness still applies — it only grades the verdicts returned.
+
 ## Quick start (no API key needed)
 
 ```bash
@@ -72,7 +74,7 @@ The **96% global agreement** (54/56) is now an honest number: the gold labels ar
 
 `contract-gap-eval reliability` exits non-zero only if a **critical** gap was missed → CI gate. The offline baseline misses two *major* gaps (the IP disclaimers above) but no critical, so it passes; a lax agent that misses a critical gap fails the build.
 
-## Run the real agent (LLM)
+## Run against a real model (LLM)
 
 ```bash
 export OPENAI_API_KEY=sk-...            # the only thing needed to go live
@@ -91,7 +93,7 @@ With a key, an LLM judges each (contract, rule) pair and cites a verbatim clause
 
 **The gold set is decoupled from the code under test.** Every expected verdict in `goldset.py` (for structured *and* judgment rules) is hand-authored from reading the contracts, not computed by calling the same `REFERENCE_CHECKS` the agent uses. A gold set derived from that shared code would grade the code with the code, inflating agreement into a tautology; a dedicated test (`test_mutating_a_reference_check_breaks_the_agent_but_not_the_gold`) proves the decoupling by **live-mutating a reference check** and asserting the gold labels do not move while the agent's measured recall drops, exactly the regression the tautology would have hidden.
 
-**The metrics are exercised by adversarial fixture agents (mutation-style testing).** `tests/` asserts a policy-following **oracle** is perfect and clean; a **lax** agent (everything compliant) is caught with gap-recall 0 and all 5 critical gaps missed; a **hallucinator** that cites absent clauses trips the citation guard on all 56 verdicts; the keyword baseline's two semantic misses (the C-4/C-7 IP disclaimers) are reported exactly; the structured reference checks match the contracts; and the relevance judge is caught when it rubber-stamps (calibrated against 12 labelled evidence items, `calibrate` reports 100% agreement).
+**The metrics are exercised by adversarial fixture agents (mutation-style testing).** `tests/` asserts a policy-following **oracle** is perfect and clean; a **lax** agent (everything compliant) is caught with gap-recall 0 and all 5 critical gaps missed; a **hallucinator** that cites absent clauses trips the citation guard on all 56 verdicts; the keyword baseline's two semantic misses (the C-4/C-7 IP disclaimers) are reported exactly; the structured reference checks match the contracts; and the relevance judge is caught when it rubber-stamps (calibrated against 12 labelled evidence items, whose quotes are themselves verbatim and pass the same citation guard the agent is held to; `calibrate` reports 83% agreement (10/12) for the static overlap judge versus 67% for a rubber stamp).
 
 ```bash
 ruff check src tests

@@ -9,23 +9,42 @@ gold set. Static judge here; an LLM judge would plug in behind the same shape.
 
 from __future__ import annotations
 
+import unicodedata
 from typing import Protocol
 
 from .models import GroundGoldItem, JudgeCalibration, PolicyRule
 from .policy import get_rule
 
-# Boilerplate legal vocabulary that appears in almost any clause and must not,
-# on its own, make an off-topic clause look relevant to a specific rule.
+# A principled, minimal set of common French function words (determiners,
+# pronouns, conjunctions, prepositions, common auxiliary/verb forms). These
+# carry no domain content, so they must not count toward evidence-rule overlap.
+# Kept deliberately to closed-class grammar words: NOT tuned to hit a target
+# agreement, and NOT stuffed with legal/domain nouns that would mask real
+# vocabulary overlap. All entries are stored accent-free (see `_norm`).
 _STOP = {
-    "contrat", "clause", "partie", "parties", "applicable", "present", "regle",
-    "cas", "sinon", "comporter", "prevoir", "faire", "etre", "doit", "aucune",
-    "standard", "livrables", "sens", "chaque", "grave",
+    "alors", "apres", "aussi", "autre", "autres", "avant", "avec", "cela",
+    "celle", "celles", "celui", "cette", "comme", "dans", "depuis", "donc",
+    "dont", "elle", "elles", "encore", "entre", "etre", "eux", "leur", "leurs",
+    "mais", "meme", "nous", "parce", "pour", "sans", "selon", "sera", "seront",
+    "ses", "soit", "sont", "sous", "sur", "tous", "tout", "toute", "toutes",
+    "vers", "votre", "vous",
 }
 
 
+def _norm(text: str) -> str:
+    """Casefold, strip accents (NFKD), and turn punctuation into spaces.
+
+    Overlap must be robust to surface differences a real LLM introduces:
+    accents (résilier vs resilier) and punctuation (l'article vs l article)
+    should never change which content words are compared.
+    """
+    decomposed = unicodedata.normalize("NFKD", text.casefold())
+    without_accents = "".join(c for c in decomposed if not unicodedata.combining(c))
+    return "".join(c if c.isalnum() else " " for c in without_accents)
+
+
 def _tokens(text: str) -> set[str]:
-    lowered = text.lower().translate(str.maketrans("àâäéèêëîïôöùûüç", "aaaeeeeiioouuuc"))
-    words = "".join(c if c.isalnum() else " " for c in lowered).split()
+    words = _norm(text).split()
     return {t for t in words if len(t) > 3 and t not in _STOP}
 
 

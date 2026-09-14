@@ -60,13 +60,13 @@ def gold_status(contract_id: str, rule_id: str) -> GapStatus:
 # cited clause pertain to the rule (True) or is it a real-but-irrelevant one?
 GROUND_GOLD: list[GroundGoldItem] = [
     GroundGoldItem(contract_id="C-1", rule_id="RGPD-28",
-                   evidence="clause de sous-traitance au sens de l'article 28 du RGPD", supports_gap=True),
+                   evidence="sous-traitant au sens de l'article 28 du RGPD", supports_gap=True),
     GroundGoldItem(contract_id="C-2", rule_id="PAY-60",
                    evidence="le paiement intervient à 90 jours", supports_gap=True),
     GroundGoldItem(contract_id="C-4", rule_id="IP",
-                   evidence="aucune cession de propriété intellectuelle n'est consentie", supports_gap=True),
+                   evidence="Le prestataire conserve l'intégralité des droits de propriété intellectuelle", supports_gap=True),
     GroundGoldItem(contract_id="C-1", rule_id="RESIL",
-                   evidence="résiliation en cas de manquement d'une partie", supports_gap=True),
+                   evidence="En cas de manquement grave, chaque partie peut résilier le contrat", supports_gap=True),
     GroundGoldItem(contract_id="C-2", rule_id="RGPD-28",
                    evidence="une clause de confidentialité standard est applicable", supports_gap=False),
     GroundGoldItem(contract_id="C-2", rule_id="CONF",
