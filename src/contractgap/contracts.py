@@ -83,6 +83,69 @@ CONTRACTS: list[Contract] = [
             Clause(heading="Confidentialité", text="Engagement de confidentialité réciproque des parties."),
         ],
     ),
+    Contract(
+        contract_id="C-5",
+        title="Contrat de maintenance, Fournisseur E",
+        payment_days=120.0,
+        liability_cap=None,
+        governing_law="allemand",
+        has_personal_data=True,
+        clauses=[
+            Clause(heading="Paiement", text="Le paiement est effectué à 120 jours."),
+            Clause(heading="Loi applicable", text="Le contrat est régi par le droit allemand."),
+            Clause(heading="Résiliation", text="Chaque partie peut résilier en cas de manquement grave."),
+        ],
+    ),
+    Contract(
+        contract_id="C-6",
+        title="Contrat de licence logicielle, Fournisseur F",
+        payment_days=30.0,
+        liability_cap=1000000.0,
+        governing_law="français",
+        has_personal_data=False,
+        clauses=[
+            Clause(heading="Responsabilité", text="La responsabilité du prestataire est plafonnée à 1 000 000 euros."),
+            Clause(heading="Paiement", text="Règlement à 30 jours."),
+            Clause(heading="Loi applicable", text="Le droit français régit le présent contrat."),
+            Clause(heading="Résiliation", text="Le contrat peut être résilié en cas de manquement."),
+            Clause(heading="Propriété intellectuelle", text="Les droits de propriété intellectuelle sur les livrables sont cédés au client."),
+            Clause(heading="Confidentialité", text="Les parties respectent une stricte confidentialité."),
+        ],
+    ),
+    Contract(
+        contract_id="C-7",
+        title="Contrat d'infogérance, Fournisseur G",
+        payment_days=75.0,
+        liability_cap=300000.0,
+        governing_law="belge",
+        has_personal_data=True,
+        clauses=[
+            Clause(heading="Responsabilité", text="La responsabilité est plafonnée à 300 000 euros."),
+            Clause(heading="Paiement", text="Le paiement intervient à 75 jours."),
+            Clause(heading="Loi applicable", text="Le présent contrat est soumis au droit belge."),
+            Clause(
+                heading="Protection des données",
+                text="Le prestataire agit en qualité de sous-traitant au sens de l'article 28 du RGPD pour les données personnelles traitées.",
+            ),
+            Clause(
+                heading="Propriété intellectuelle",
+                text="Le prestataire demeure titulaire de l'ensemble des droits de propriété intellectuelle ; aucune cession n'est consentie au client.",
+            ),
+            Clause(heading="Confidentialité", text="Les parties garantissent la confidentialité des informations échangées."),
+        ],
+    ),
+    Contract(
+        contract_id="C-8",
+        title="Accord-cadre de services, Fournisseur H",
+        payment_days=None,
+        liability_cap=None,
+        governing_law="français",
+        has_personal_data=False,
+        clauses=[
+            Clause(heading="Loi applicable", text="Le droit français est applicable au contrat."),
+            Clause(heading="Résiliation", text="Résiliation possible en cas de manquement d'une partie."),
+        ],
+    ),
 ]
 
 

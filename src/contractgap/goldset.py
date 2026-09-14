@@ -1,54 +1,59 @@
-"""Ground truth per (contract, rule).
+"""Ground truth per (contract, rule) — hand-labelled, independent of the code.
 
-Structured rules are labelled objectively by their reference check over the
-extracted fields (so labels can't drift from the contracts). Judgment rules are
-hand-labelled here, because they turn on reading the clause text — including the
-C-4 IP clause that names the right words but grants nothing to the client.
+Every expected verdict below is authored BY HAND from reading contracts.py, for
+BOTH structured and judgment rules. Nothing here calls `REFERENCE_CHECKS` (the
+same reference the agent under test uses), so the gold set cannot grade the code
+with the code: the agreement it measures is real, not a tautology. The C-4 and
+C-7 IP clauses name the right words while granting the client nothing (a
+semantic gap a keyword scan misses); those are labelled GAP here on purpose.
 """
 
 from __future__ import annotations
 
 from .contracts import CONTRACTS
-from .models import GapStatus, GoldItem, GroundGoldItem, RuleKind
-from .policy import REFERENCE_CHECKS, RULES, get_rule
+from .models import GapStatus, GoldItem, GroundGoldItem
+from .policy import RULE_IDS, RULES
 
-# Hand-authored ground truth for JUDGMENT rules, keyed (contract_id, rule_id).
-_JUDGMENT_LABELS: dict[tuple[str, str], GapStatus] = {
-    # RGPD-28 (applies only when personal data is processed)
-    ("C-1", "RGPD-28"): GapStatus.COMPLIANT,
-    ("C-2", "RGPD-28"): GapStatus.GAP,           # personal data, no art. 28 clause
-    ("C-3", "RGPD-28"): GapStatus.NOT_APPLICABLE,  # no personal data
-    ("C-4", "RGPD-28"): GapStatus.COMPLIANT,
-    # RESIL
-    ("C-1", "RESIL"): GapStatus.COMPLIANT,
-    ("C-2", "RESIL"): GapStatus.COMPLIANT,
-    ("C-3", "RESIL"): GapStatus.COMPLIANT,
-    ("C-4", "RESIL"): GapStatus.COMPLIANT,
-    # IP
-    ("C-1", "IP"): GapStatus.COMPLIANT,
-    ("C-2", "IP"): GapStatus.COMPLIANT,
-    ("C-3", "IP"): GapStatus.GAP,   # no IP clause at all
-    ("C-4", "IP"): GapStatus.GAP,   # clause grants nothing to the client (semantic gap)
-    # CONF
-    ("C-1", "CONF"): GapStatus.COMPLIANT,
-    ("C-2", "CONF"): GapStatus.COMPLIANT,
-    ("C-3", "CONF"): GapStatus.GAP,  # no confidentiality clause
-    ("C-4", "CONF"): GapStatus.COMPLIANT,
+_C = GapStatus.COMPLIANT
+_G = GapStatus.GAP
+_NA = GapStatus.NOT_APPLICABLE
+
+# Hand-authored ground truth for EVERY (contract, rule) pair, keyed by
+# contract id, in RULE_IDS order: LIAB-CAP, PAY-60, LAW-FR, RGPD-28, RESIL, IP,
+# CONF. Read off contracts.py by hand — not computed from the policy checks.
+_LABELS: dict[str, tuple[GapStatus, ...]] = {
+    # LIAB   PAY   LAW   RGPD  RESIL IP    CONF
+    "C-1": (_C,   _C,   _C,   _C,   _C,   _C,   _C),
+    "C-2": (_G,   _G,   _G,   _G,   _C,   _C,   _C),
+    "C-3": (_C,   _C,   _C,   _NA,  _C,   _G,   _G),
+    "C-4": (_C,   _G,   _C,   _C,   _C,   _G,   _C),
+    "C-5": (_G,   _G,   _G,   _G,   _C,   _G,   _G),
+    "C-6": (_C,   _C,   _C,   _NA,  _C,   _C,   _C),
+    "C-7": (_C,   _G,   _G,   _C,   _G,   _G,   _C),
+    "C-8": (_G,   _G,   _C,   _NA,  _C,   _G,   _G),
 }
+
+
+def _label(contract_id: str, rule_id: str) -> GapStatus:
+    return _LABELS[contract_id][RULE_IDS.index(rule_id)]
 
 
 def build_gold_set() -> list[GoldItem]:
     items: list[GoldItem] = []
     for contract in CONTRACTS:
         for rule in RULES:
-            if rule.kind is RuleKind.STRUCTURED:
-                expected = REFERENCE_CHECKS[rule.rule_id](contract)
-            else:
-                expected = _JUDGMENT_LABELS[(contract.contract_id, rule.rule_id)]
             items.append(
-                GoldItem(contract_id=contract.contract_id, rule_id=rule.rule_id, expected=expected)
+                GoldItem(
+                    contract_id=contract.contract_id,
+                    rule_id=rule.rule_id,
+                    expected=_label(contract.contract_id, rule.rule_id),
+                )
             )
     return items
+
+
+def gold_status(contract_id: str, rule_id: str) -> GapStatus:
+    return _label(contract_id, rule_id)
 
 
 # Labelled examples for calibrating the evidence-relevance judge: does the
@@ -66,13 +71,16 @@ GROUND_GOLD: list[GroundGoldItem] = [
                    evidence="une clause de confidentialité standard est applicable", supports_gap=False),
     GroundGoldItem(contract_id="C-2", rule_id="CONF",
                    evidence="ce contrat est soumis au droit anglais", supports_gap=False),
+    GroundGoldItem(contract_id="C-5", rule_id="PAY-60",
+                   evidence="le paiement est effectué à 120 jours", supports_gap=True),
+    GroundGoldItem(contract_id="C-7", rule_id="LAW-FR",
+                   evidence="le présent contrat est soumis au droit belge", supports_gap=True),
+    GroundGoldItem(contract_id="C-7", rule_id="IP",
+                   evidence="le prestataire demeure titulaire de l'ensemble des droits de propriété intellectuelle", supports_gap=True),
+    GroundGoldItem(contract_id="C-3", rule_id="IP",
+                   evidence="règlement à 60 jours", supports_gap=False),
+    GroundGoldItem(contract_id="C-1", rule_id="CONF",
+                   evidence="les parties s'engagent à la confidentialité des informations échangées", supports_gap=True),
+    GroundGoldItem(contract_id="C-4", rule_id="CONF",
+                   evidence="aucune cession n'est consentie au client", supports_gap=False),
 ]
-
-
-def gold_status(contract_id: str, rule_id: str) -> GapStatus:
-    rule = get_rule(rule_id)
-    if rule.kind is RuleKind.STRUCTURED:
-        from .contracts import get_contract
-
-        return REFERENCE_CHECKS[rule_id](get_contract(contract_id))
-    return _JUDGMENT_LABELS[(contract_id, rule_id)]

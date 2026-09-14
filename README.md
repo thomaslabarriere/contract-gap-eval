@@ -48,25 +48,29 @@ OK CONF      Confidentialité
 
 ## The number a legal team asks for: gap-recall
 
-`contract-gap-eval reliability` scores the agent against a labelled gold set. The star metric is **gap-recall by severity**, a missed *critical* gap is what destroys client trust:
+`contract-gap-eval reliability` scores the agent against a labelled gold set of **22 real gaps across 8 contracts** (56 (contract, rule) labels). The star metric is **gap-recall by severity**, a missed *critical* gap is what destroys client trust:
 
 ```
 ────────────────────────────────────────────────────────────────────
 Fiabilité de l'agent: heuristic
 ────────────────────────────────────────────────────────────────────
-Gap-recall: 88% (7/8 écarts détectés)   Précision: 100%
-Écarts manqués: 1 (dont critiques: 0)
+Gap-recall: 91% (20/22 écarts détectés)   Précision: 100%
+Écarts manqués: 2 (dont critiques: 0)
 Fausses alertes: 0   Citations hallucinées: 0
 
 Recall par sévérité
-  critical  100%  (2/2)
-  major      80%  (4/5)
-  minor     100%  (1/1)
+  critical  100%  (5/5)
+  major      86%  (12/14)
+  minor     100%  (3/3)
+
+Accord global: 96% (54/56)
 ```
 
-That 88% is instructive: the offline keyword baseline **misses one major gap**, the C-4 clause *"le prestataire conserve l'intégralité des droits de propriété intellectuelle ; aucune cession n'est consentie au client."* It names all the right words, so a keyword scan reads it as compliant; only reading the negation reveals it grants the client nothing. Run the LLM agent (`--agent llm`) and re-measure to see whether it closes the gap, exactly the question you'd ask before trusting either one in front of a General Counsel.
+That 91% is instructive: the offline keyword baseline **misses two major gaps**, both IP clauses (C-4 and C-7) of the form *"le prestataire conserve/demeure titulaire de l'intégralité des droits de propriété intellectuelle ; aucune cession n'est consentie au client."* They name all the right words, so a keyword scan reads them as compliant; only reading the negation reveals they grant the client nothing. Every *critical* gap is caught. Run the LLM agent (`--agent llm`) and re-measure to see whether it closes the gap, exactly the question you'd ask before trusting either one in front of a General Counsel.
 
-`contract-gap-eval reliability` exits non-zero only if a **critical** gap was missed → CI gate. The offline baseline misses one *major* gap (the IP disclaimer above) but no critical, so it passes; a lax agent that misses a critical gap fails the build.
+The **96% global agreement** (54/56) is now an honest number: the gold labels are hand-authored in `goldset.py`, independent of the reference checks the agent uses (see *Why you can trust the harness*), so the agreement measures the agent against ground truth rather than the code grading itself.
+
+`contract-gap-eval reliability` exits non-zero only if a **critical** gap was missed → CI gate. The offline baseline misses two *major* gaps (the IP disclaimers above) but no critical, so it passes; a lax agent that misses a critical gap fails the build.
 
 ## Run the real agent (LLM)
 
@@ -83,9 +87,11 @@ With a key, an LLM judges each (contract, rule) pair and cites a verbatim clause
 - **Citation hallucination (objective).** Whenever a verdict cites a clause as evidence, that quote must **actually appear in the contract** (checked by substring), an agent that invents a clause is caught with certainty, no judgment call. (Structured-rule gaps like a missing liability cap cite a field check rather than a quote; the guard applies to every verdict that does cite text, which the LLM agent is prompted to always do.)
 - **Evidence relevance (judged, and the judge is calibrated).** A cited clause can be real yet irrelevant to the rule. That softer call is delegated to a judge whose own agreement with a labelled gold set is reported by `calibrate`, *who judges the judge?*
 
-## Why you can trust the harness (mutation proof)
+## Why you can trust the harness
 
-`tests/` asserts a policy-following **oracle** is perfect and clean; a **lax** agent (everything compliant) is caught with gap-recall 0 and both critical gaps missed; a **hallucinator** that cites absent clauses trips the citation guard on every verdict; the keyword baseline's single semantic miss is reported exactly; the structured reference checks match the contracts; and the relevance judge is caught when it rubber-stamps.
+**The gold set is decoupled from the code under test.** Every expected verdict in `goldset.py` (for structured *and* judgment rules) is hand-authored from reading the contracts, not computed by calling the same `REFERENCE_CHECKS` the agent uses. A gold set derived from that shared code would grade the code with the code, inflating agreement into a tautology; a dedicated test (`test_mutating_a_reference_check_breaks_the_agent_but_not_the_gold`) proves the decoupling by **live-mutating a reference check** and asserting the gold labels do not move while the agent's measured recall drops, exactly the regression the tautology would have hidden.
+
+**The metrics are exercised by adversarial fixture agents (mutation-style testing).** `tests/` asserts a policy-following **oracle** is perfect and clean; a **lax** agent (everything compliant) is caught with gap-recall 0 and all 5 critical gaps missed; a **hallucinator** that cites absent clauses trips the citation guard on all 56 verdicts; the keyword baseline's two semantic misses (the C-4/C-7 IP disclaimers) are reported exactly; the structured reference checks match the contracts; and the relevance judge is caught when it rubber-stamps (calibrated against 12 labelled evidence items, `calibrate` reports 100% agreement).
 
 ```bash
 ruff check src tests
@@ -100,7 +106,7 @@ src/contractgap/
   models.py     # contracts (severity, gap status, gap matrix, gold, calibration)
   policy.py     # the internal policy + deterministic reference checks (structured rules)
   contracts.py  # synthetic contracts (incl. the C-4 IP semantic-gap clause)
-  goldset.py    # ground truth (objective for structured, hand for judgment) + judge gold
+  goldset.py    # ground truth (hand-authored, decoupled from the code) + judge gold
   agent.py      # heuristic baseline + lax/hallucinator fixtures + oracle
   llm_agent.py  # the real LLM gap-analysis agent (needs a key)
   judge.py      # evidence-relevance judge + calibration
@@ -109,7 +115,7 @@ src/contractgap/
   report.py     # render the matrix and the reliability report
   pricing.py    # illustrative token pricing
   cli.py        # check | reliability | calibrate
-tests/          # mutation-proof + reference checks + gold shape + calibration
+tests/          # adversarial fixtures + gold decoupling mutation + reference checks + calibration
 ```
 
 ## License

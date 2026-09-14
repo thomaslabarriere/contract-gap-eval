@@ -89,6 +89,9 @@ RULES: list[PolicyRule] = [
 ]
 
 
+RULE_IDS: list[str] = [rule.rule_id for rule in RULES]
+
+
 def get_rule(rule_id: str) -> PolicyRule:
     for rule in RULES:
         if rule.rule_id == rule_id:
