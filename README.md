@@ -6,7 +6,7 @@ An AI agent that reviews contracts is only deployable in a legal department if y
 
 > **Scope.** SYNTHETIC contracts and a SIMPLIFIED illustrative internal policy, not legal advice, not a real compliance product, no client data. The value is the diagnostic instrument (and how honestly it measures missed gaps), not the legal content. Plug in a real policy + contracts for real numbers.
 
-> **On the word "agent".** The thing under test is a **one-shot classifier/verifier**, not an autonomous agent: for each (contract, rule) pair the real-model path is a single `chat.completions.create` call with one `report_gap` tool and no planning, memory, or multi-step tool loop. Where the code and this README say "agent" it is only a loose label for "the thing being evaluated"; the offline baseline and the `lax`/`hallucinator`/oracle fixtures are plain, network-free classifiers. Plug in a genuinely agentic reviewer and the same harness still applies — it only grades the verdicts returned.
+> **On the word "agent".** The thing under test is a **one-shot classifier/verifier**, not an autonomous agent: for each (contract, rule) pair the real-model path is a single `chat.completions.create` call with one `report_gap` tool and no planning, memory, or multi-step tool loop. Where the code and this README say "agent" it is only a loose label for "the thing being evaluated"; the offline baseline and the `lax`/`hallucinator`/oracle fixtures are plain, network-free classifiers. Plug in a genuinely agentic reviewer and the same harness still applies: it only grades the verdicts returned.
 
 ## Quick start (no API key needed)
 
